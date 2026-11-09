@@ -1,0 +1,7 @@
+Equipment ID,Name,Type,Height_m,Width_m,Length_m,Weight_kg,Status
+EQ-001,Rough Terrain Crane 90t,Crane,12.5,3.0,14.2,48000,Available
+EQ-002,Vacuum Truck,Vac Truck,3.6,2.5,9.1,15800,Available
+EQ-003,Hydroblast Unit,Hydroblaster,3.9,2.6,10.5,20400,Available
+EQ-004,Mobile Scaffold Rig,Scaffold,3.5,2.5,9.8,17500,Available
+EQ-005,Nitrogen Pump Unit,Nitrogen Pump,3.2,2.4,7.3,12900,Maintenance
+EQ-006,Boom Lift 60ft,Aerial Lift,2.6,2.3,8.4,9800,Available

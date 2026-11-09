@@ -1,0 +1,44 @@
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [Natural_Resources_Gantt_Demo]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Public client-side config only (same values as .env.example).
+      VITE_PORTAL_URL: https://esripetroleum.maps.arcgis.com
+      VITE_ARCGIS_OAUTH_APP_ID: pto32fRzGMpp5cqU
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

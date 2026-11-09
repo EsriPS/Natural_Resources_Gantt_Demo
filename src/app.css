@@ -1,0 +1,663 @@
+:root {
+  /* Light Esri (ArcGIS Online) theme. */
+  --bg: #f4f6f8;          /* app canvas */
+  --panel: #ffffff;       /* cards / bars */
+  --panel-2: #eef1f4;     /* subtle fills, tracks */
+  --text: #151515;        /* primary text (Calcite ink) */
+  --muted: #6a6f73;       /* secondary text */
+  --border: #d6dadd;      /* hairlines */
+  --accent: #0079c1;      /* Esri blue */
+  --accent-hover: #005e95;
+  --warn: #e8a33d;
+  --danger: #d83020;      /* Calcite danger red */
+  --ok: #35ac46;
+  font-family: 
+    'Avenir Next', 
+    'Segoe UI', 
+    system-ui, 
+    -apple-system, 
+    Roboto, 
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  grid-template-rows: 56px 1fr 6px var(--gantt-h, 300px);
+  grid-template-areas:
+    "topbar    topbar"
+    "scene     inspector"
+    "resizer   resizer"
+    "gantt     gantt";
+  height: 100vh;
+  gap: 1px;
+  background: var(--border);
+  --gantt-h: 300px;
+}
+
+/* Draggable splitter between the scene/inspector row and the Gantt. */
+#gantt-resizer {
+  grid-area: resizer;
+  background: var(--panel-2);
+  cursor: row-resize;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#gantt-resizer::after {
+  content: '';
+  width: 42px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border);
+}
+#gantt-resizer:hover { background: color-mix(in srgb, var(--accent) 18%, var(--panel-2)); }
+#gantt-resizer:hover::after { background: var(--accent); }
+#gantt-resizer.is-dragging { background: color-mix(in srgb, var(--accent) 28%, var(--panel-2)); }
+body.gantt-resizing { cursor: row-resize; user-select: none; }
+
+#topbar {
+  grid-area: topbar;
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+}
+
+/* Esri Calcite top bar (R12). */
+.topbar-esri {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+.tb-brand { display: flex; align-items: center; gap: 8px; flex: none; }
+.tb-brand .tb-mark { color: var(--accent); font-size: 15px; }
+.tb-brand .tb-title { font-weight: 600; font-size: 15px; letter-spacing: 0.01em; }
+
+.tb-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+.tb-filter .tb-filter-label {
+  --calcite-label-margin-bottom: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+/* Keep the Calcite date picker's popup above the scene/gantt. */
+.tb-filter calcite-input-date-picker { --calcite-input-date-picker-z-index: 600; }
+
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+/* Dark Calcite theme tokens so the components match the app shell. */
+.topbar-esri {
+  --calcite-color-brand: var(--accent);
+  --calcite-color-brand-hover: var(--accent-hover);
+  --calcite-color-brand-press: var(--accent-hover);
+}
+
+.scene { 
+  grid-area: scene; 
+  background: var(--panel-2); 
+  position: relative; 
+  overflow: hidden; 
+}
+.inspector { 
+  grid-area: inspector; 
+  background: var(--panel); 
+  padding: 12px; 
+  overflow: auto; 
+}
+.gantt { 
+  grid-area: gantt; 
+  background: var(--panel); 
+  position: relative; 
+  overflow: hidden; 
+}
+.gantt-host { position: relative; height: 100%; }
+.gantt-scroll { position: absolute; inset: 0; overflow: auto; }
+
+/* Floating playback control pinned to the Gantt's top-left corner (R12) —
+   it fills the empty header/row-label gutter cell, left of the day axis. */
+.gantt-playback {
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  z-index: 20;
+  display: flex;
+  gap: 5px;
+  padding: 3px 5px;
+  background: color-mix(in srgb, var(--panel) 86%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+}
+.gantt-pb-btn {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 26px;
+  height: 22px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gantt-pb-btn:hover:not(:disabled) { 
+  border-color: var(--accent); 
+  color: var(--accent); 
+}
+.gantt-pb-btn:disabled { 
+  opacity: 0.45; 
+  cursor: default; 
+}
+.gantt-pb-play.is-playing {  
+  background: var(--accent); 
+  color: #fff; 
+  border-color: var(--accent); 
+  }
+
+/* Pick two Gantt bars and display their route in the scene. */
+.gantt-route {
+  position: absolute;
+  right: 10px;
+  top: 4px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 3px 5px;
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
+}
+
+/* Route-specific crane placement tools, shown only after two route stops exist. */
+.scene-crane-control {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 8;
+  display: flex;
+  gap: 6px;
+  padding: 7px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+.scene-crane-control button {
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.scene-crane-control button:hover,
+.scene-crane-control button.is-active {
+  background: var(--accent-hover);
+}
+.scene-crane-control button.scene-crane-remove {
+  border-color: var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+}
+.scene-crane-control button.scene-crane-remove:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.gantt-route-btn,
+.gantt-route-clear {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--panel-2);
+  color: var(--text);
+  height: 22px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+.gantt-route-btn { padding: 0 9px; font-weight: 600; }
+.gantt-route-btn:hover,
+.gantt-route-btn.is-active { border-color: var(--accent); color: var(--accent); }
+.gantt-route-btn.is-active { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.gantt-route-status { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.gantt-route-clear { width: 22px; padding: 0; font-size: 17px; line-height: 1; }
+.gantt-route-clear:hover { color: var(--danger); border-color: var(--danger); }
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Scene sign-in status */
+.scene-signin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  color: var(--muted);
+  font-size: 13px;
+}
+.scene-signin button {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Scene load-error screen (Phase 6.2) */
+.scene-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  padding: 28px 32px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.scene-error-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--panel-2);
+  color: var(--muted);
+}
+.scene-error-auth .scene-error-badge {
+  background: rgba(248, 81, 73, 0.18);
+  color: var(--danger);
+}
+.scene-error-cors .scene-error-badge {
+  background: rgba(210, 153, 34, 0.18);
+  color: var(--warn);
+}
+.scene-error-network .scene-error-badge {
+  background: rgba(47, 129, 247, 0.18);
+  color: var(--accent);
+}
+.scene-error h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.scene-error p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  word-break: break-word;
+}
+.scene-error button {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+/* Phase 8 — weather source badge (top bar). */
+.weather-badge {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--panel-2);
+  white-space: nowrap;
+}
+.weather-badge.weather-nws {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  background: color-mix(in srgb, var(--ok) 12%, var(--panel-2));
+}
+.weather-badge.weather-sample {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+  background: color-mix(in srgb, var(--warn) 12%, var(--panel-2));
+  cursor: help;
+}
+
+/* R6.4 — clickable hazard list popover under the weather badge. */
+.hazard-badge-slot {
+  position: relative;
+}
+.hazard-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  width: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  color: var(--text);
+}
+.hazard-popover-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.hazard-src {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.hazard-popover-empty {
+  padding: 14px 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.hazard-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+}
+.hazard-row {
+  display: flex;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: 6px;
+  border-left: 3px solid var(--border);
+}
+.hazard-row + .hazard-row {
+  margin-top: 2px;
+}
+.hazard-row.hazard-sev-warning {
+  border-left-color: var(--danger);
+}
+.hazard-row.hazard-sev-watch {
+  border-left-color: var(--warn);
+}
+.hazard-row.hazard-sev-advisory {
+  border-left-color: var(--accent);
+}
+.hazard-icon {
+  font-size: 16px;
+  line-height: 1.3;
+}
+.hazard-body {
+  flex: 1;
+  min-width: 0;
+}
+.hazard-headline {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.hazard-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.hazard-chip {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  color: var(--muted);
+}
+.hazard-chip.hazard-sev-warning {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 15%, var(--panel-2));
+}
+.hazard-chip.hazard-sev-watch {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 15%, var(--panel-2));
+}
+.hazard-chip.hazard-sev-advisory {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, var(--panel-2));
+}
+.hazard-when {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Phase 9 — inspector panel. */
+.insp {
+  padding: 14px;
+  font-size: 13px;
+}
+.insp-kind {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.insp-kind-conflict {
+  color: var(--danger);
+}
+.insp-live {
+  color: var(--ok);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.insp h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  line-height: 1.3;
+}
+.insp-sub {
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+.insp-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0 0 8px;
+}
+.insp-fields dt {
+  color: var(--muted);
+}
+.insp-fields dd {
+  margin: 0;
+}
+.insp-crew {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--panel-2);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+.insp-priority { display: inline-flex; align-items: center; gap: 6px; }
+.insp-priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.insp-tag {
+  font-size: 10px;
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+  padding: 0 5px;
+  border-radius: 999px;
+}
+.insp-section {
+  margin-top: 14px;
+}
+.insp-section h4 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.insp-conflict-note {
+  background: color-mix(in srgb, var(--danger) 10%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.insp-conflict-note h4 {
+  color: var(--danger);
+}
+.insp-conflict-note p {
+  margin: 0;
+}
+.insp-tasklist,
+.insp-hazards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.insp-tasklist-item {
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+.insp-tasklist-item:first-child {
+  border-top: none;
+}
+.insp-live-row {
+  position: relative;
+}
+.insp-live-row::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+.insp-when {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.insp-empty {
+  color: var(--muted);
+  padding: 6px 0;
+}
+.insp-chip {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+}
+.insp-chip:hover {
+  text-decoration: underline;
+}
+.insp-hazard {
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+}
+.insp-hazard:first-child {
+  border-top: none;
+}
+.insp-hazard-sev {
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  color: var(--muted);
+  margin-right: 4px;
+}
+.insp-sev-warning .insp-hazard-sev {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 15%, var(--panel-2));
+}
+.insp-sev-watch .insp-hazard-sev {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 15%, var(--panel-2));
+}
+.insp-sev-advisory .insp-hazard-sev {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, var(--panel-2));
+}
+
+/* Same-person double-booking (R3.4) — red + ⚠, matching the same-zone conflict. */
+.insp-kind-person {
+  color: var(--danger);
+}
+.insp-person-note {
+  background: color-mix(in srgb, var(--danger) 10%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.insp-person-note h4 { 
+  color: var(--danger); 
+}
+.insp-person-note p { 
+  margin: 0; 
+}

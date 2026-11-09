@@ -1,0 +1,10 @@
+Resource ID,Crew / Technician,Primary Trade,Home Area,Shift Start,Shift End,Daily Capacity (hrs),Availability
+R-101,Crude Unit Operations,Panel/Field Operator,Crude Unit,2026-10-19T06:00:00.000Z,2026-10-19T16:00:00.000Z,9,Available
+R-102,FCC Operations,Panel/Field Operator,FCC Complex,2026-10-19T06:00:00.000Z,2026-10-19T16:00:00.000Z,9,Available
+R-201,I&E Team 1,I&E Technician,Hydrotreating,2026-10-19T07:00:00.000Z,2026-10-19T17:00:00.000Z,9,Available
+R-202,I&E Team 2,I&E Technician,Tank Farm & Utilities,2026-10-19T07:00:00.000Z,2026-10-19T17:00:00.000Z,9,Available
+R-301,Rotating Equipment Crew 1,Rotating Equipment Technician,Crude Unit,2026-10-19T06:30:00.000Z,2026-10-19T16:30:00.000Z,9,Available
+R-302,Rotating Equipment Crew 2,Rotating Equipment Technician,FCC Complex,2026-10-19T06:30:00.000Z,2026-10-19T16:30:00.000Z,9,Training
+R-401,Piping/Mechanical Crew,Piping/Mechanical Technician,Tank Farm & Utilities,2026-10-19T06:00:00.000Z,2026-10-19T16:00:00.000Z,9,Available
+R-501,Environmental Field Team,Environmental Specialist,Hydrotreating,2026-10-19T07:00:00.000Z,2026-10-19T17:00:00.000Z,8,Available
+R-601,Fixed Equipment Inspection Crew,Fixed Equipment Inspector,Tank Farm & Utilities,2026-10-19T06:00:00.000Z,2026-10-19T16:00:00.000Z,9,Available

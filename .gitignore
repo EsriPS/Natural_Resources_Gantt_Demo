@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-ssr/
+
+# local secrets / credentials
+.env
+.env.local
+*.local
+
+# token-bearing probe output (regenerate with scripts/login_and_inspect.py)
+scripts/scene_report.json
+
+# built file geodatabase (build from src/data/gdb_source/ CSVs)
+*.gdb/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+
+# local KiroCrew CLI settings (keep .kiro/specs, drop local settings)
+.kiro/settings/
+
+# private / client material, keep out of the public repo
+.kiro/
+buildingLayer.lpkx
+src/data/*.xlsx
+*.pptx
