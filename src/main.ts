@@ -20,8 +20,8 @@ import {
   generatedEquipment,
   generatedZones,
   generatedTasks,
-  GENERATED_ANCHOR_TIME,
 } from './data/plant.generated';
+import { buildDynamicSchedule } from './data/dynamicSchedule';
 import { FeatureBackend } from './data/featureBackend';
 
 const AUTO_SIGN_IN_KEY = 'plant-scheduler-oauth-attempted';
@@ -31,12 +31,16 @@ function main(): void {
   // element is created by the TopBar.
   registerCalcite();
 
+  // Re-lay the baked work orders onto the two weeks starting today, inside
+  // 08:00-17:00 and with no zone, person or equipment double-booking.
+  const schedule = buildDynamicSchedule(generatedTasks, generatedPeople);
+
   const store = new ScheduleStore({
-    people: generatedPeople,
+    people: schedule.people,
     equipment: generatedEquipment,
     zones: generatedZones,
-    tasks: generatedTasks,
-    currentTime: GENERATED_ANCHOR_TIME,
+    tasks: schedule.tasks,
+    currentTime: schedule.anchorTime,
   });
 
   // Esri feature-class backend (R10/R11): client-side People + Equipment tables
