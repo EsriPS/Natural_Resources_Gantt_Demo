@@ -10,7 +10,6 @@ import type { ScheduleStore } from '../store/ScheduleStore';
 import type { Hazard } from '../store/types';
 import { config } from '../config';
 import { fetchNwsWeather, normalizeWeather } from './nws';
-import { scheduleDomain } from '../gantt/timeScale';
 import { sampleForecastResponse, sampleActiveAlertsResponse } from '../data/forecast.sample';
 
 export type WeatherSource = 'nws' | 'sample';
@@ -53,9 +52,10 @@ export function alignHazardsToSchedule(hazards: Hazard[], scheduleStartMs: numbe
 }
 
 export async function loadWeather(store: ScheduleStore): Promise<WeatherLoadResult> {
-  const scheduleStartMs = new Date(
-    scheduleDomain(store.getState().tasks).start,
-  ).getTime();
+  // The schedule now starts today (see data/dynamicSchedule.ts), so align to
+  // today: the live NWS forecast stays on its real dates (a zero shift), and
+  // the captured sample forecast is moved onto today.
+  const scheduleStartMs = Date.now();
   try {
     const { forecast, alerts } = await fetchNwsWeather(config.plant.lat, config.plant.lon);
     const hazards = alignHazardsToSchedule(
