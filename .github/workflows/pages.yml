@@ -20,7 +20,7 @@ jobs:
     env:
       # Public client-side config only (same values as .env.example).
       VITE_PORTAL_URL: https://esripetroleum.maps.arcgis.com
-      VITE_ARCGIS_OAUTH_APP_ID: pto32fRzGMpp5cqU
+      VITE_ARCGIS_OAUTH_APP_ID: 3DUKRGRJWEjYPo3D
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
